@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  main_app:
+    build:
+      context: .
+    container_name: main_app
+    ports:
+      - "${DJANGO_PORT}:8000"
+    command: "python3 manage.py runserver 0.0.0.0:8000"
+    env_file:
+        - ./.env
+    depends_on:
+      - postgres_db
+    # volumes:
+    #   - .:/app/
+
+  postgres_db:
+    image: postgres:latest
+    container_name: postgres_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    env_file:
+        - ./.env
+
+volumes:
+  postgres_data:
