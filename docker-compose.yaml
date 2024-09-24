@@ -12,8 +12,8 @@ services:
         - ./.env
     depends_on:
       - postgres_db
-    # volumes:
-    #   - .:/app/
+    volumes:
+      - .:/app/
 
   postgres_db:
     image: postgres:latest

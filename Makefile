@@ -18,7 +18,7 @@ db-logs:
 
 .PHONY: app
 app:
-	${DC} up -d
+	${DC} up -d --build
 
 .PHONY: app-down
 app-down:
@@ -35,3 +35,7 @@ migrate:
 .PHONY: migrations
 migrations:
 	${EXEC} ${APP_CONTAINER} python manage.py makemigrations
+
+.PHONY: run-test
+run-test:
+	${EXEC} ${APP_CONTAINER} pytest
