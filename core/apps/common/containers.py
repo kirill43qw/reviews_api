@@ -1,7 +1,10 @@
 from functools import lru_cache
 
+from django.conf import settings
+from httpx import Client
 import punq
 
+from core.apps.common.elasticsearch import ElasticClient
 from core.apps.customers.services.auth import AuthService, BaseAuthService
 from core.apps.customers.services.codes import BaseCodeService, DjangoCacheService
 from core.apps.customers.services.customers import (
@@ -24,9 +27,16 @@ from core.apps.reviews.services.reviews import (
     BaseReviewValidatorService,
     ComposedReviewValidatorService,
     ORMReviewService,
+    ReviewRatingValidatorService,
+    SingleReviewValidatorService,
+)
+from core.apps.reviews.services.search import (
+    BaseTitleSearchService,
+    ElasticTitleSearchService,
 )
 from core.apps.reviews.services.titles import BaseTitleService, ORMTitleService
 from core.apps.reviews.use_cases.review_create import CreateReviewUseCase
+from core.apps.reviews.use_cases.upsert_search_data import UpsertSearchDataUseCase
 
 
 @lru_cache(1)
@@ -37,13 +47,28 @@ def get_container() -> punq.Container:
 def _initialize_container() -> punq.Container:
     container = punq.Container()
 
-    # initialize category
+    def build_validators() -> BaseReviewValidatorService:
+        return ComposedReviewValidatorService(
+            validators=[
+                container.resolve(SingleReviewValidatorService),
+                container.resolve(ReviewRatingValidatorService),
+            ]
+        )
+
+    def build_elastic_search_service() -> BaseTitleSearchService:
+        return ElasticTitleSearchService(
+            client=ElasticClient(http_client=Client(base_url=settings.ELASTIC_URL)),
+            index_name=settings.ELASTIC_PRODUCT_INDEX,
+        )
+
+    # initialize services
     container.register(BaseCategoryService, ORMCategoryService)
-
-    # initialize genre
     container.register(BaseGenreService, ORMGenreService)
-
-    # initialize customers
+    container.register(BaseReviewService, ORMReviewService)
+    container.register(BaseTitleService, ORMTitleService)
+    container.register(BaseTitleSearchService, factory=build_elastic_search_service)
+    container.register(SingleReviewValidatorService)
+    container.register(ReviewRatingValidatorService)
     container.register(BaseCustomersService, ORMCustomerService)
     container.register(BaseCodeService, DjangoCacheService)
     container.register(
@@ -55,15 +80,10 @@ def _initialize_container() -> punq.Container:
         ),
     )
     container.register(BaseAuthService, AuthService)
+    container.register(BaseReviewValidatorService, factory=build_validators)
 
-    # initialize titles
-    container.register(BaseTitleService, ORMTitleService)
-
-    # initialize reviews
-    container.register(BaseReviewService, ORMReviewService)
-    container.register(
-        BaseReviewValidatorService, ComposedReviewValidatorService, validators=[]
-    )
+    # init user cases
+    container.register(UpsertSearchDataUseCase)
     container.register(CreateReviewUseCase)
 
     return container

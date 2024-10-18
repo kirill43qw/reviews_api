@@ -2,6 +2,7 @@ from datetime import datetime
 from django.db import models
 from core.apps.common.models import TimedBaseModel
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.postgres.fields import ArrayField
 
 from core.apps.reviews.models import Category, Genre
 from core.apps.reviews.entities import TitleEntity

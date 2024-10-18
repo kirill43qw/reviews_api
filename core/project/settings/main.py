@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # first party
     "core.apps.reviews.apps.ReviewsConfig",
     "core.apps.customers.apps.CustomersConfig",
 ]
@@ -143,3 +142,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+ELASTIC_URL = env("ELASTIC_URL")
+ELASTIC_PRODUCT_INDEX = env("ELASTIC_PRODUCT_INDEX", default="title-index")

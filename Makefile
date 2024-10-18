@@ -1,16 +1,20 @@
-DC = docker compose
 EXEC = docker exec -it
 DB_CONTAINER = postgres_db
 APP_CONTAINER = main_app
 ENV_FILE = --env-file .env
+MONITAORING_FILE = monitoring.yaml
 
 .PHONY: db
 db:
-	${DC} up ${DB_CONTAINER} -d
+	docker compose up ${DB_CONTAINER} -d
 
 .PHONY: db-down
 db-down:
-	${DC} down ${DB_CONTAINER}
+	docker compose down ${DB_CONTAINER}
+
+.PHONY: postgres
+postgres:
+	${EXEC} ${DB_CONTAINER} psql -U postgres_user -d reviews_db -p 5432
 
 .PHONY: db-logs
 db-logs:
@@ -18,15 +22,27 @@ db-logs:
 
 .PHONY: app
 app:
-	${DC} up -d --build
+	docker compose up -d --build
+
+.PHONY: app-slim
+app-slim:
+	docker compose up ${APP_CONTAINER} ${DB_CONTAINER} -d --build
 
 .PHONY: app-down
 app-down:
-	${DC} down
+	docker compose down
 
 .PHONY: app-logs
 app-logs:
 	docker logs ${APP_CONTAINER} -f
+
+# .PHONY: monitoring
+# monitoring:
+# 	docker compose -f ${MONITAORING_FILE} up -d
+#
+# .PHONY: monitoring-logs
+# monitoring-logs:
+# 	docker compose -f ${MONITORING_FILE} ${ENV} logs -f
 
 .PHONY: migrate 
 migrate:
@@ -35,7 +51,3 @@ migrate:
 .PHONY: migrations
 migrations:
 	${EXEC} ${APP_CONTAINER} python manage.py makemigrations
-
-.PHONY: run-test
-run-test:
-	${EXEC} ${APP_CONTAINER} pytest

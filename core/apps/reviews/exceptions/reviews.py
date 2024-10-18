@@ -9,4 +9,14 @@ class ReviewInvalidRating(ServiceException):
 
     @property
     def message(self):
-        return "Rating is not valid"
+        return "Rating is not valid. max 10, min 1"
+
+
+@dataclass(eq=False)
+class SingleReviewError(ServiceException):
+    title_id: int
+    author_id: int
+
+    @property
+    def message(self):
+        return "User already posted a review on this title."

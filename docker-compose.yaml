@@ -12,6 +12,7 @@ services:
         - ./.env
     depends_on:
       - postgres_db
+      - elasticsearch
     volumes:
       - .:/app/
 
@@ -25,5 +26,30 @@ services:
     env_file:
         - ./.env
 
+  elasticsearch:
+    image: elasticsearch:7.17.22
+    container_name: elasticsearch
+    environment:
+    - bootstrap.memory_lock=true
+    - cluster.name=docker-cluster
+    - cluster.routing.allocation.disk.threshold_enabled=false
+    - discovery.type=single-node
+    - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
+    - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+    volumes:
+    - esdata:/usr/share/elasticsearch/data
+    ports:
+    - 9200:9200
+    healthcheck:
+      interval: 30s
+      retries: 10
+      test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
 volumes:
   postgres_data:
+  esdata:
+    driver: local

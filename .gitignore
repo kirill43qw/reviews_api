@@ -3,3 +3,7 @@ __pycache__/
 core/project/settings/local.py
 .env
 *.sqlite*
+tests/
+templates/
+static/
+.idea/
