@@ -4,9 +4,10 @@ from typing import Iterable
 from django.db.models import Q
 
 from core.api.filters import PaginationIn
-from core.apps.reviews.entities.categories import CategoryEntity
+from core.apps.reviews.entities import CategoryEntity
+from core.apps.reviews.exceptions.category import CategoryNotFound
 from core.apps.reviews.filters.categories import CategoryFilters
-from core.apps.reviews.models.categories import Category as CategoryDTO
+from core.apps.reviews.models import Category as CategoryDTO
 
 
 class BaseCategoryService(ABC):
@@ -15,8 +16,17 @@ class BaseCategoryService(ABC):
         self, filters: CategoryFilters, pagination: PaginationIn
     ) -> Iterable[CategoryEntity]: ...
 
+    # @abstractmethod
+    # def get_category_count(self, filters: CategoryFilters) -> int: ...
+
     @abstractmethod
-    def get_category_count(self, filters: CategoryFilters) -> int: ...
+    def save_category(self, category_data: CategoryEntity) -> CategoryEntity: ...
+
+    @abstractmethod
+    def get_by_id(self, category_id: int) -> CategoryDTO: ...
+
+    @abstractmethod
+    def delete_category(self, category_dto: CategoryDTO) -> None: ...
 
 
 class ORMCategoryService(BaseCategoryService):
@@ -35,6 +45,20 @@ class ORMCategoryService(BaseCategoryService):
         ]
         return [category.to_entity() for category in qs]
 
-    def get_category_count(self, filters: CategoryFilters) -> int:
-        query = self._build_category_query(filters)
-        return CategoryDTO.objects.filter(query).count()
+    # def get_category_count(self, filters: CategoryFilters) -> int:
+    #     query = self._build_category_query(filters)
+    #     return CategoryDTO.objects.filter(query).count()
+
+    def get_by_id(self, category_id: int) -> CategoryDTO:
+        try:
+            return CategoryDTO.objects.get(id=category_id)
+        except CategoryDTO.DoesNotExist:
+            raise CategoryNotFound(category_id=category_id)
+
+    def save_category(self, category_data: CategoryEntity) -> CategoryEntity:
+        category_dto = CategoryDTO.from_entity(category=category_data)
+        category_dto.save()
+        return category_dto.to_entity()
+
+    def delete_category(self, category_dto: CategoryDTO) -> None:
+        category_dto.delete()

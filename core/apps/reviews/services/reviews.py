@@ -1,13 +1,28 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import datetime
 
+from core.api.filters import PaginationIn
 from core.apps.customers.entities import CustomerEntity
 from core.apps.reviews.entities import TitleEntity, ReviewEntity
-from core.apps.reviews.exceptions.reviews import ReviewInvalidRating, SingleReviewError
+from core.apps.reviews.exceptions.reviews import (
+    ReviewInvalidRating,
+    ReviewNotFount,
+    SingleReviewError,
+)
 from core.apps.reviews.models import Review as ReviewDTO
 
 
 class BaseReviewService(ABC):
+    @abstractmethod
+    def get_review_list(
+        self, title_id: int, pagination: PaginationIn
+    ) -> Iterable[ReviewEntity]: ...
+
+    @abstractmethod
+    def get_by_id(self, review_id: int) -> ReviewDTO: ...
+
     @abstractmethod
     def check_review_exists(
         self, title: TitleEntity, author: CustomerEntity
@@ -18,8 +33,30 @@ class BaseReviewService(ABC):
         self, title: TitleEntity, author: CustomerEntity, review: ReviewEntity
     ) -> ReviewEntity: ...
 
+    @abstractmethod
+    def update_review(
+        self, review: ReviewDTO, review_data=ReviewEntity
+    ) -> ReviewEntity: ...
+
+    @abstractmethod
+    def delete_review(self, review: ReviewDTO) -> None: ...
+
 
 class ORMReviewService(BaseReviewService):
+    def get_review_list(
+        self, title_id: int, pagination: PaginationIn
+    ) -> Iterable[ReviewEntity]:
+        query = ReviewDTO.objects.filter(title_id=title_id)[
+            pagination.offset : pagination.offset + pagination.limit
+        ]
+        return [review.to_entity() for review in query]
+
+    def get_by_id(self, review_id: int) -> ReviewDTO:
+        try:
+            return ReviewDTO.objects.select_related("author", "title").get(id=review_id)
+        except ReviewDTO.DoesNotExist:
+            raise ReviewNotFount(review_id=review_id)
+
     def check_review_exists(self, title: TitleEntity, author: CustomerEntity) -> bool:
         return ReviewDTO.objects.filter(title_id=title.id, author_id=author.id).exists()
 
@@ -29,6 +66,26 @@ class ORMReviewService(BaseReviewService):
         review_dto = ReviewDTO.from_entity(review=review, title=title, customer=author)
         review_dto.save()
         return review_dto.to_entity()
+
+    def update_review(
+        self, review: ReviewDTO, review_data=ReviewEntity
+    ) -> ReviewEntity:
+        fields_to_update = {
+            "text": review_data.text,
+            "rating": review_data.rating,
+        }
+
+        for field, value in fields_to_update.items():
+            if value is not None:
+                setattr(review, field, value)
+
+        review.updated_at = datetime.now()
+        review.save()
+
+        return review.to_entity()
+
+    def delete_review(self, review: ReviewDTO) -> None:
+        review.delete()
 
 
 class BaseReviewValidatorService(ABC):

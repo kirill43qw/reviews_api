@@ -41,23 +41,18 @@ class Customer(TimedBaseModel):
     USERNAME_FIELD = "phone"
     REQUIRED_FIELDS = ["username"]
 
-    @property
-    def is_moderator(self):
-        return self.role == self.MODERATOR
-
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN
-
     def __str__(self):
         return self.username
 
     def to_entity(self) -> CustomerEntity:
         return CustomerEntity(
-            phone=self.phone,
+            id=self.id,
             username=self.username,
+            phone=self.phone,
+            bio=self.phone,
+            role=self.role,
             created_at=self.created_at,
-            id=self.pk,
+            updated_at=self.updated_at,
         )
 
     class Meta:

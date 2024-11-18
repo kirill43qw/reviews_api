@@ -17,6 +17,14 @@ class Category(TimedBaseModel):
             updated_at=self.updated_at,
         )
 
+    @classmethod
+    def from_entity(cls, category: CategoryEntity) -> "Category":
+        return cls(
+            id=category.id,
+            title=category.title,
+            slug=category.slug,
+        )
+
     def __str__(self):
         return self.title
 

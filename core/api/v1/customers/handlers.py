@@ -14,7 +14,7 @@ from core.apps.customers.services.auth import BaseAuthService
 from core.apps.common.containers import get_container
 
 
-router = Router(tags=["Customers"])
+router = Router(tags=["Auth"])
 
 
 @router.post("auth", response=ApiResponse[AuthOutSchema], operation_id="authorize")

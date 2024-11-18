@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+import logging
 
-from httpx import Client, post
+from httpx import Client, delete, post
 
 
 @dataclass
@@ -15,6 +16,10 @@ class ElasticClient:
                 "doc_as_upsert": True,
             },
         )
+        response.raise_for_status()
+
+    def delete_doc(self, index: str, document_id: int | str):
+        response = self.http_client.delete(f"{index}/_doc/{document_id}")
         response.raise_for_status()
 
 

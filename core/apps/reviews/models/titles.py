@@ -2,7 +2,6 @@ from datetime import datetime
 from django.db import models
 from core.apps.common.models import TimedBaseModel
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.postgres.fields import ArrayField
 
 from core.apps.reviews.models import Category, Genre
 from core.apps.reviews.entities import TitleEntity
@@ -38,15 +37,34 @@ class Title(TimedBaseModel):
     def __str__(self):
         return self.title
 
+    @classmethod
+    def from_entity(cls, title: TitleEntity) -> "Title":
+        instance = cls(
+            id=title.id,
+            title=title.title,
+            rating=title.rating,
+            year=title.year,
+            description=title.description,
+            category_id=title.category_id,
+            created_at=title.created_at,
+            updated_at=title.updated_at,
+        )
+        instance.save()
+        instance.genre.set(title.genre_ids)
+        return instance
+
     def to_entity(self) -> TitleEntity:
+        category_id = self.category.id if self.category else None
+        genre_ids = list(self.genre.values_list("id", flat=True))
+
         return TitleEntity(
             id=self.id,
             title=self.title,
             rating=self.rating,
             year=self.year,
             description=self.description,
-            category=self.category,
-            genre=self.genre,
+            category_id=category_id,
+            genre_ids=genre_ids,
             created_at=self.created_at,
             updated_at=self.updated_at,
         )

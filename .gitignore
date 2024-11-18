@@ -1,9 +1,10 @@
 __pycache__/
 .mypy_cache/
-core/project/settings/local.py
-.env
 *.sqlite*
-tests/
 templates/
 static/
 .idea/
+.venv/
+.vscode/
+.pytest_cache/
+notes.txt

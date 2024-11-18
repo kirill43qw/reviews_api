@@ -24,25 +24,18 @@ db-logs:
 app:
 	docker compose up -d --build
 
-.PHONY: app-slim
-app-slim:
+.PHONY: app-without-elastic
+app-without-elastic:
 	docker compose up ${APP_CONTAINER} ${DB_CONTAINER} -d --build
 
 .PHONY: app-down
 app-down:
 	docker compose down
 
-.PHONY: app-logs
-app-logs:
+.PHONY: logs
+logs:
 	docker logs ${APP_CONTAINER} -f
 
-# .PHONY: monitoring
-# monitoring:
-# 	docker compose -f ${MONITAORING_FILE} up -d
-#
-# .PHONY: monitoring-logs
-# monitoring-logs:
-# 	docker compose -f ${MONITORING_FILE} ${ENV} logs -f
 
 .PHONY: migrate 
 migrate:
@@ -51,3 +44,11 @@ migrate:
 .PHONY: migrations
 migrations:
 	${EXEC} ${APP_CONTAINER} python manage.py makemigrations
+
+.PHONY: test
+test:
+	${EXEC} ${APP_CONTAINER} pytest
+
+.PHONY: sync
+sync:
+	${EXEC} ${APP_CONTAINER} python3 manage.py upsert_title_search

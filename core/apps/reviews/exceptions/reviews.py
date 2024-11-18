@@ -4,6 +4,15 @@ from core.apps.common.exceptions import ServiceException
 
 
 @dataclass(eq=False)
+class ReviewNotFount(ServiceException):
+    review_id: int
+
+    @property
+    def message(self):
+        return "Review not found || "
+
+
+@dataclass(eq=False)
 class ReviewInvalidRating(ServiceException):
     rating: int
 

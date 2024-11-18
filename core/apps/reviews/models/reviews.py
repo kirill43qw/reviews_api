@@ -46,6 +46,8 @@ class Review(TimedBaseModel):
             rating=self.rating,
             created_at=self.created_at,
             updated_at=self.updated_at,
+            title=self.title,
+            author=self.author,
         )
 
     class Meta:

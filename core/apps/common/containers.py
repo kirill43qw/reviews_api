@@ -5,6 +5,7 @@ from httpx import Client
 import punq
 
 from core.apps.common.elasticsearch import ElasticClient
+from core.apps.common.permission_service import PermissionService
 from core.apps.customers.services.auth import AuthService, BaseAuthService
 from core.apps.customers.services.codes import BaseCodeService, DjangoCacheService
 from core.apps.customers.services.customers import (
@@ -21,6 +22,7 @@ from core.apps.reviews.services.categories import (
     BaseCategoryService,
     ORMCategoryService,
 )
+from core.apps.reviews.services.comments import BaseCommentService, ORMCommentService
 from core.apps.reviews.services.genres import BaseGenreService, ORMGenreService
 from core.apps.reviews.services.reviews import (
     BaseReviewService,
@@ -35,7 +37,26 @@ from core.apps.reviews.services.search import (
     ElasticTitleSearchService,
 )
 from core.apps.reviews.services.titles import BaseTitleService, ORMTitleService
-from core.apps.reviews.use_cases.review_create import CreateReviewUseCase
+from core.apps.reviews.use_cases.category_crud import (
+    CreateCategoryUseCase,
+    DeleteCategoryUseCase,
+)
+from core.apps.reviews.use_cases.comment_crud import (
+    CreateCommentUseCase,
+    DeleteCommentUseCase,
+    UpdateCommentUseCase,
+)
+from core.apps.reviews.use_cases.genre_create import CreateGenreUseCase
+from core.apps.reviews.use_cases.review_dto import (
+    CreateReviewUseCase,
+    DeleteReviewUseCase,
+    UpdateReviewUseCase,
+)
+from core.apps.reviews.use_cases.title_dto import (
+    UpdateTitleUseCase,
+    CreateTitleUseCase,
+    DeleteTitleUseCase,
+)
 from core.apps.reviews.use_cases.upsert_search_data import UpsertSearchDataUseCase
 
 
@@ -66,6 +87,7 @@ def _initialize_container() -> punq.Container:
     container.register(BaseGenreService, ORMGenreService)
     container.register(BaseReviewService, ORMReviewService)
     container.register(BaseTitleService, ORMTitleService)
+    container.register(BaseCommentService, ORMCommentService)
     container.register(BaseTitleSearchService, factory=build_elastic_search_service)
     container.register(SingleReviewValidatorService)
     container.register(ReviewRatingValidatorService)
@@ -81,9 +103,21 @@ def _initialize_container() -> punq.Container:
     )
     container.register(BaseAuthService, AuthService)
     container.register(BaseReviewValidatorService, factory=build_validators)
+    container.register(PermissionService, PermissionService)
 
     # init user cases
     container.register(UpsertSearchDataUseCase)
+    container.register(CreateCategoryUseCase)
+    container.register(DeleteCategoryUseCase)
+    container.register(CreateGenreUseCase)
+    container.register(CreateTitleUseCase)
+    container.register(UpdateTitleUseCase)
+    container.register(DeleteTitleUseCase)
     container.register(CreateReviewUseCase)
+    container.register(UpdateReviewUseCase)
+    container.register(DeleteReviewUseCase)
+    container.register(CreateCommentUseCase)
+    container.register(UpdateCommentUseCase)
+    container.register(DeleteCommentUseCase)
 
     return container

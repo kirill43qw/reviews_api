@@ -17,6 +17,14 @@ class Genre(TimedBaseModel):
             updated_at=self.updated_at,
         )
 
+    @classmethod
+    def from_entity(cls, genre: GenreEntity) -> "Genre":
+        return cls(
+            id=genre.id,
+            title=genre.title,
+            slug=genre.slug,
+        )
+
     def __str__(self):
         return self.title
 

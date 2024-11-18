@@ -10,6 +10,9 @@ class BaseTitleSearchService(ABC):
     @abstractmethod
     def upsert_title(self, title: TitleEntity): ...
 
+    @abstractmethod
+    def delete_title(self, title_id: id): ...
+
 
 @dataclass
 class ElasticTitleSearchService(BaseTitleSearchService):
@@ -32,3 +35,6 @@ class ElasticTitleSearchService(BaseTitleSearchService):
             document_id=title.id,
             document=self._build_as_document(title),
         )
+
+    def delete_title(self, title_id: int):
+        self.client.delete_doc(index=self.index_name, document_id=title_id)
