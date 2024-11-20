@@ -47,9 +47,7 @@
 * `make migrate` - выполнение миграций
 * `make sync` -  создание индекса в Elasticsearch
 
----
-
-* Документация проекта доступна по адресу (http://localhost:8000/api/docs)
+* Документация проекта доступна по адресу [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
 
 ---
 ## Алгоритм регистрации пользователей
