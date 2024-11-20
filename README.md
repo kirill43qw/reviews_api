@@ -18,30 +18,50 @@
 
 ---
 
-## Установка и запуск
-```bash
-git clone 'https://github.com/kirill43qw/reviews_api'
-make app
-docker-compose up -d --build
-make migrations
-make migrate
-docker exec -it main_app python3 manage.py makemigrations
-docker exec -it main_app python3 manage.py migrate
-make sync
-docker exec -it main_app upsert_title_search
+## Технологии проекта
+
+- Python 3.11
+- Django
+- Django-ninja
+- PostgreSQL
+- Redis
+- Elasticsearch
+- Docker, Docker Compose
+- Nginx
 
 ---
 
+## Requirements
+
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [GNU Make](https://www.gnu.org/software/make/)
+
+---
+
+## Установка и запуск
+* `git clone 'https://github.com/kirill43qw/reviews_api'`
+* `cd reviews_api`
+* `make app` - сборка приложения
+* `make migrations` - создание файлов миграции
+* `make migrate` - выполнение миграций
+* `make sync` -  создание индекса в Elasticsearch
+
+---
+
+* Документация проекта доступна по адресу (http://localhost:8000/api/docs)
+
+---
 ## Алгоритм регистрации пользователей
 
-1. **Запрос на `auth/`:**
+1. **Запрос на `/api/v1/auth/`:**
    Пользователь отправляет запрос с параметрами `phone` и `number`.
    
 2. **Получение кода подтверждения:**
-   Сервис отправляет SMS с кодом подтверждения (`confirmation_code`) на указанный номер.
+   Пользователь получвет код подтверждения.
 
 3. **Подтверждение регистрации:**
-   Пользователь отправляет код вместе с номером телефона на `confirm/` и получает `token`.
+   Пользователь отправляет код вместе с номером телефона на `api/v1/confirm/` и получает `token`.
 
 4. **Редактирование профиля:**
    Пользователь может отправить `PATCH`-запрос на `/users/me/` для заполнения профиля. Все поля описаны в документации.
