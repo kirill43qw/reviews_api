@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-import logging
 
-from httpx import Client, delete, post
+from httpx import Client, post
 
 
 @dataclass

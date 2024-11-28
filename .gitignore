@@ -2,9 +2,9 @@ __pycache__/
 .mypy_cache/
 *.sqlite*
 templates/
-static/
 .idea/
 .venv/
 .vscode/
 .pytest_cache/
+staticfiles/
 notes.txt

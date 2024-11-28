@@ -1,6 +1,7 @@
 EXEC = docker exec -it
 DB_CONTAINER = postgres_db
 APP_CONTAINER = main_app
+NGINX_CONTAINER = nginx
 ENV_FILE = --env-file .env
 MONITAORING_FILE = monitoring.yaml
 
@@ -26,7 +27,7 @@ app:
 
 .PHONY: app-without-elastic
 app-without-elastic:
-	docker compose up ${APP_CONTAINER} ${DB_CONTAINER} -d --build
+	docker compose up ${APP_CONTAINER} ${DB_CONTAINER} ${NGINX_CONTAINER} -d --build
 
 .PHONY: app-down
 app-down:
@@ -44,6 +45,10 @@ migrate:
 .PHONY: migrations
 migrations:
 	${EXEC} ${APP_CONTAINER} python manage.py makemigrations
+
+.PHONY: collectstatic
+collectstatic:
+	${EXEC} ${APP_CONTAINER} python3 manage.py collectstatic
 
 .PHONY: test
 test:
